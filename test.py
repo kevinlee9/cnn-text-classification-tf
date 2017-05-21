@@ -9,13 +9,15 @@ import data_helpers
 from text_cnn import TextCNN
 from tensorflow.contrib import learn
 
+from preprocessing import util
+
 # Parameters
 # ==================================================
 
 # Data loading params
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("positive_data_file", "./data/rt-polaritydata/rt-polarity.pos", "Data source for the positive data.")
-tf.flags.DEFINE_string("negative_data_file", "./data/rt-polaritydata/rt-polarity.neg", "Data source for the negative data.")
+tf.flags.DEFINE_string("positive_data_file", "./data/13_binary/pos", "Data source for the positive data.")
+tf.flags.DEFINE_string("negative_data_file", "./data/13_binary/neg", "Data source for the negative data.")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
@@ -50,9 +52,56 @@ print("Loading data...")
 x_text, y = data_helpers.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
 
 # Build vocabulary
-max_document_length = max([len(x.split(" ")) for x in x_text])
-vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
-x = np.array(list(vocab_processor.fit_transform(x_text)))
+# max_document_length = max([len(x.split(" ")) for x in x_text])
+# vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
+# x = np.array(list(vocab_processor.fit_transform(x_text)))
+
+# x_file = "/DB/rhome/zkli/src/python/sentiment/data/13.txt"
+
+# x_text = []
+# y_text = []
+# senti_options = [u'0', u'1']
+# with open(x_file) as f:
+#     for line in f:
+#         items = line.strip().split("|")
+#
+#         # senti = items[-1]
+#         # if senti not in
+#         x_text.append(items[0: -1])
+#         y_text.append(items[-1])
+
+# y = []
+# for item in y_text:
+#     if item == u'0':
+#         y.append([1, 0])
+#     elif item == u'1':
+#         y.append([0, 1])
+#     else:
+#         raise Exception("invalid senti type")
+#
+
+max_document_length = 99
+vocab_dic = learn.preprocessing.CategoricalVocabulary()
+vocab_file = "/DB/rhome/zkli/data/weibo.withstop.voc"
+
+with open(vocab_file) as f:
+    for line in f:
+        items = line.decode("utf-8").strip().split(u" ")
+        word = items[0]
+        vocab_dic.add(word)
+
+vocab_dic.freeze()
+
+
+def tokenize_fn(docs):
+    for doc in docs:
+        yield util.text2tokens(doc)
+
+vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length, vocabulary=vocab_dic,
+                                                          tokenizer_fn=tokenize_fn)
+x = np.array(list(vocab_processor.transform(x_text)))
+
+exit(0)
 
 
 # Randomly shuffle data

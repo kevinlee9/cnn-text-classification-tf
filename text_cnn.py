@@ -21,9 +21,18 @@ class TextCNN(object):
 
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
-            self.W = tf.Variable(
-                tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
-                name="W")
+            embedding_status = False
+            if embedding_status:
+                embedding_file = ""
+                with open(embedding_file) as f:
+                    import pickle
+                    embedding_matrix = pickle.load(f)
+
+                self.W = tf.Variable(embedding_matrix, name="W")
+            else:
+                self.W = tf.Variable(
+                    tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0),
+                    name="W")
             self.embedded_chars = tf.nn.embedding_lookup(self.W, self.input_x)
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
 
