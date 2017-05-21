@@ -15,12 +15,14 @@ from preprocessing import util
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
+# tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_float("dev_sample_percentage", .3, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("positive_data_file", "./data/13_binary/pos", "Data source for the positive data.")
 tf.flags.DEFINE_string("negative_data_file", "./data/13_binary/neg", "Data source for the negative data.")
 
 # Model Hyperparameters
-tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
+# tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
+tf.flags.DEFINE_integer("embedding_dim", 400, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes (default: '3,4,5')")
 tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
@@ -56,6 +58,7 @@ x_text, y = data_helpers.load_data_and_labels(FLAGS.positive_data_file, FLAGS.ne
 # vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
 # x = np.array(list(vocab_processor.fit_transform(x_text)))
 
+# Raw Adapter
 # x_file = "/DB/rhome/zkli/src/python/sentiment/data/13.txt"
 
 # x_text = []
@@ -101,11 +104,12 @@ vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length, v
                                                           tokenizer_fn=tokenize_fn)
 x = np.array(list(vocab_processor.transform(x_text)))
 
-exit(0)
+# exit(0)
 
 
 # Randomly shuffle data
 np.random.seed(10)
+# np.random.seed(0) # to make sequence predictable
 shuffle_indices = np.random.permutation(np.arange(len(y)))
 x_shuffled = x[shuffle_indices]
 y_shuffled = y[shuffle_indices]
@@ -135,7 +139,8 @@ with tf.Graph().as_default():
             embedding_size=FLAGS.embedding_dim,
             filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
             num_filters=FLAGS.num_filters,
-            l2_reg_lambda=FLAGS.l2_reg_lambda)
+            l2_reg_lambda=FLAGS.l2_reg_lambda,
+            embedding_status=True)
 
         # Define Training procedure
         global_step = tf.Variable(0, name="global_step", trainable=False)

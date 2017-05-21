@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-
+from gensim.models.keyedvectors import KeyedVectors
 
 class TextCNN(object):
     """
@@ -9,7 +9,7 @@ class TextCNN(object):
     """
     def __init__(
       self, sequence_length, num_classes, vocab_size,
-      embedding_size, filter_sizes, num_filters, l2_reg_lambda=0.0):
+      embedding_size, filter_sizes, num_filters, l2_reg_lambda=0.0, embedding_status=False):
 
         # Placeholders for input, output and dropout
         self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name="input_x")
@@ -21,12 +21,11 @@ class TextCNN(object):
 
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
-            embedding_status = False
             if embedding_status:
-                embedding_file = ""
-                with open(embedding_file) as f:
-                    import pickle
-                    embedding_matrix = pickle.load(f)
+                embedding_file = "/DB/rhome/zkli/data/weibo.withstop.vector"
+                print "loading word embedding file"
+                model = KeyedVectors.load_word2vec_format(embedding_file)
+                embedding_matrix = np.vstack((np.random.uniform(-1.0, 1.0, size=[1, embedding_size]), model.syn0))
 
                 self.W = tf.Variable(embedding_matrix, name="W")
             else:
