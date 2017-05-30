@@ -222,9 +222,15 @@ with tf.Graph().as_default():
               cnn.input_y: y_batch,
               cnn.dropout_keep_prob: 1.0
             }
-            step, summaries, loss, accuracy, y_true, y_predict = sess.run(
-                [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.y_true, cnn.y_predict],
+            # step, summaries, loss, accuracy, y_true, y_predict = sess.run(
+            #     [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.y_true, cnn.y_predict],
+            #     feed_dict)
+
+            step, summaries, loss, accuracy, y_predict = sess.run(
+                [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.y_predict],
                 feed_dict)
+            y_true = np.argmax(input_y, 1)
+
             precision =  metrics.precision_score(y_true, y_predict)
             recall = metrics.recall_score(y_true, y_predict)
             f1 = metrics.f1_score(y_true, y_predict)
