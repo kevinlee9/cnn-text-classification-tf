@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from gensim.models.keyedvectors import KeyedVectors
+import sklearn as sk
 
 class TextCNN(object):
     """
@@ -88,5 +89,19 @@ class TextCNN(object):
 
         # Accuracy
         with tf.name_scope("accuracy"):
+            # input_y is matrix
             correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))
             self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
+
+            # F1
+            y_true = tf.argmax(self.input_y, 1)
+            y_true_np = y_true.eval()
+            y_predict = self.predictions.eval()
+            self.precision =  sk.metrics.precision_score(y_true, y_pred)
+            self.recall = sk.metrics.recall_score(y_true, y_pred)
+            self.f1 = sk.metrics.f1_score(y_true, y_pred)
+
+
+
+
+
