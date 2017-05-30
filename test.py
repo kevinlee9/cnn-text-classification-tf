@@ -2,6 +2,7 @@
 
 import tensorflow as tf
 import numpy as np
+import sklearn as sk
 import os
 import time
 import datetime
@@ -166,18 +167,20 @@ with tf.Graph().as_default():
         # Summaries for loss and accuracy
         loss_summary = tf.summary.scalar("loss", cnn.loss)
         acc_summary = tf.summary.scalar("accuracy", cnn.accuracy)
-        pre_summary = tf.summary.scalar("precision", cnn.precision)
-        rec_summary = tf.summary.scalar("recall", cnn.recall)
-        f1_summary = tf.summary.scalar("f1", cnn.f1)
+        # pre_summary = tf.summary.scalar("precision", cnn.precision)
+        # rec_summary = tf.summary.scalar("recall", cnn.recall)
+        # f1_summary = tf.summary.scalar("f1", cnn.f1)
 
 
         # Train Summaries
-        train_summary_op = tf.summary.merge([loss_summary, acc_summary, grad_summaries_merged, pre_summary, rec_summary, f1_summary])
+        # train_summary_op = tf.summary.merge([loss_summary, acc_summary, grad_summaries_merged, pre_summary, rec_summary, f1_summary])
+        train_summary_op = tf.summary.merge([loss_summary, acc_summary, grad_summaries_merged])
         train_summary_dir = os.path.join(out_dir, "summaries", "train")
         train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
 
         # Dev summaries
-        dev_summary_op = tf.summary.merge([loss_summary, acc_summary, pre_summary, rec_summary, f1_summary])
+        # dev_summary_op = tf.summary.merge([loss_summary, acc_summary, pre_summary, rec_summary, f1_summary])
+        dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
         dev_summary_dir = os.path.join(out_dir, "summaries", "dev")
         dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
 
@@ -219,9 +222,12 @@ with tf.Graph().as_default():
               cnn.input_y: y_batch,
               cnn.dropout_keep_prob: 1.0
             }
-            step, summaries, loss, accuracy, precision, recall, f1 = sess.run(
-                [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.precision, cnn.recall, cnn.f1],
+            step, summaries, loss, accuracy, y_true, y_predict = sess.run(
+                [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.y_true, cnn.y_predict],
                 feed_dict)
+            precision =  sk.metrics.precision_score(y_true, y_predict)
+            recall = sk.metrics.recall_score(y_true, y_predict)
+            f1 = sk.metrics.f1_score(y_true, y_predict)
             time_str = datetime.datetime.now().isoformat()
             print("{}: step {}, loss {:g}, acc {:g}, pre {:g}, rec {:g}, f1 {:g}".format(time_str, step, loss, accuracy, precision,
                 recall, f1))
