@@ -23,7 +23,7 @@ class TextCNN(object):
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
             if embedding_status:
-                embedding_file = "/DB/rhome/zkli/data/weibo.withstop.glove"
+                embedding_file = "/DB/rhome/zkli/data/weibo.withstop.vector"
                 print "loading word embedding file"
                 model = KeyedVectors.load_word2vec_format(embedding_file)
                 embedding_matrix = np.vstack((np.random.uniform(-1.0, 1.0, size=[1, embedding_size]), model.syn0)).astype(np.float32)
