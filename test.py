@@ -2,7 +2,7 @@
 
 import tensorflow as tf
 import numpy as np
-import sklearn as sk
+import sklearn.metrics as metrics
 import os
 import time
 import datetime
@@ -225,9 +225,9 @@ with tf.Graph().as_default():
             step, summaries, loss, accuracy, y_true, y_predict = sess.run(
                 [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.y_true, cnn.y_predict],
                 feed_dict)
-            precision =  sk.metrics.precision_score(y_true, y_predict)
-            recall = sk.metrics.recall_score(y_true, y_predict)
-            f1 = sk.metrics.f1_score(y_true, y_predict)
+            precision =  metrics.precision_score(y_true, y_predict)
+            recall = metrics.recall_score(y_true, y_predict)
+            f1 = metrics.f1_score(y_true, y_predict)
             time_str = datetime.datetime.now().isoformat()
             print("{}: step {}, loss {:g}, acc {:g}, pre {:g}, rec {:g}, f1 {:g}".format(time_str, step, loss, accuracy, precision,
                 recall, f1))
